@@ -34,8 +34,10 @@ $ npm run test:cov
 
 ```env
 PORT=4023
-POPULATE=0
-MONDB_DB_CONN_STR=''
+POPULATE=1
+MONDB_DB_CONN_STR='mongodb://serhii:serhii_pass@localhost:27018/assign-doctors-visit-db?authMechanism=DEFAULT&authSource=admin'
+QUEUE_HOST='localhost'
+QUEUE_PORT=6380
 ```
 
 [Persist cron jobs stackoverflow question with answer](https://stackoverflow.com/questions/36568096/persist-my-cron-jobs-and-execute-them-even-if-my-node-server-restarted)

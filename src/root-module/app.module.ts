@@ -4,7 +4,6 @@ import { APP_FILTER } from '@nestjs/core';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import Joi from 'joi';
-import { ScheduleModule } from '@nestjs/schedule';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -13,6 +12,7 @@ import { DoctorModule } from '../resources/doctor/doctor.module';
 import { SlotModule } from '../resources/slot/slot.module';
 import { AllExceptionsFilter } from '../common/filters/all-exceptions.filter';
 import { MongooseModule } from '@nestjs/mongoose';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -21,7 +21,10 @@ import { MongooseModule } from '@nestjs/mongoose';
       expandVariables: true,
       validationSchema: Joi.object({
         PORT: Joi.number().required(),
+        POPULATE: Joi.number().required(),
         MONDB_DB_CONN_STR: Joi.string().required(),
+        QUEUE_HOST: Joi.string().required(),
+        QUEUE_PORT: Joi.number().required(),
       }),
     }),
     // ScheduleModule.forRoot(),
@@ -37,6 +40,17 @@ import { MongooseModule } from '@nestjs/mongoose';
     DoctorModule,
     SlotModule,
     CustomLoggerModule,
+
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get('QUEUE_HOST'),
+          port: +configService.get('QUEUE_PORT'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
   ],
   controllers: [AppController],
   providers: [

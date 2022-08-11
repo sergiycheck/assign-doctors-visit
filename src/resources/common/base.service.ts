@@ -39,7 +39,8 @@ export class EntityService<
 
   async findOne(id: string) {
     const entity = (await this.model.findById(id).lean()) as LeanDocument<TClassEntity>;
-    return this.mapResponse(entity);
+
+    return entity ? this.mapResponse(entity) : null;
   }
 
   async update(id: string, updateEntityDto: TUpdateClassEntityDto) {
