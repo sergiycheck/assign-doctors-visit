@@ -38,3 +38,5 @@ $ npm run test:cov
 - nodejs-persistable-scheduler (mysql persistence)
 - [node-schedule](https://github.com/node-schedule/node-schedule#readme)
 - [nestjs queues with bull](https://docs.nestjs.com/techniques/queues)
+- [timestamp-converter](http://www.timestamp-converter.com/)
+- [nest js issue about custom nest-cli-prefill.json](https://github.com/nestjs/nest-cli/issues/452)

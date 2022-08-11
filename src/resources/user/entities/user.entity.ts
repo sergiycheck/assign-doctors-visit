@@ -1,7 +1,9 @@
 import { BaseEntity } from '../../common/base-entities';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
-import { Slot } from '../../../resources/slot/entities/slot.entity';
+import { Slot, SlotDocumentName } from '../../../resources/slot/entities/slot.entity';
+
+export const UserDocumentName = 'User';
 
 @Schema({ timestamps: true, versionKey: false })
 export class User extends BaseEntity {
@@ -14,7 +16,7 @@ export class User extends BaseEntity {
   @Prop({ required: true, maxlength: 100 })
   email: string;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: Slot.name }] })
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: SlotDocumentName }] })
   slots: Slot[];
 }
 

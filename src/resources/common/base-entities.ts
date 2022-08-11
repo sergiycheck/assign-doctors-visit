@@ -7,5 +7,5 @@ export class BaseEntity {
   }
 
   @Expose({ name: 'id' })
-  public _id: mongoose.Schema.Types.ObjectId;
+  public _id?: mongoose.Types.ObjectId;
 }
