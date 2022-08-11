@@ -1,16 +1,8 @@
-import { SlotDocumentName } from './../resources/slot/entities/slot.entity';
+import { EntitiesDocumentNames } from './../resources/common/base-entities';
 import mongoose, { Connection, Model } from 'mongoose';
 import { CustomLogger } from '../common/logger/custom-logger.service';
-import {
-  User,
-  UserDocument,
-  UserDocumentName,
-} from '../resources/user/entities/user.entity';
-import {
-  Doctor,
-  DoctorDocument,
-  DoctorDocumentName,
-} from '../resources/doctor/entities/doctor.entity';
+import { User, UserDocument } from '../resources/user/entities/user.entity';
+import { Doctor, DoctorDocument } from '../resources/doctor/entities/doctor.entity';
 import { Slot, SlotsDocument } from '../resources/slot/entities/slot.entity';
 
 export class DbInitializer {
@@ -18,22 +10,22 @@ export class DbInitializer {
     private connection: Connection,
     private logger: CustomLogger,
     //
-    public usersCollName = `${UserDocumentName.toLocaleLowerCase()}s`,
-    public doctorsCollName = `${DoctorDocumentName.toLocaleLowerCase()}s`,
-    public slotsCollName = `${SlotDocumentName.toLocaleLowerCase()}s`,
+    public usersCollName = `${EntitiesDocumentNames.User.toLocaleLowerCase()}s`,
+    public doctorsCollName = `${EntitiesDocumentNames.Doctor.toLocaleLowerCase()}s`,
+    public slotsCollName = `${EntitiesDocumentNames.Slot.toLocaleLowerCase()}s`,
   ) {}
 
   public async seedManyDocumentsIntoDb() {
     const UserModel = (await this.connection.model(
-      UserDocumentName,
+      EntitiesDocumentNames.User,
     )) as Model<UserDocument>;
 
     const DoctorsModel = (await this.connection.model(
-      DoctorDocumentName,
+      EntitiesDocumentNames.Doctor,
     )) as Model<DoctorDocument>;
 
     const SlotsModel = (await this.connection.model(
-      SlotDocumentName,
+      EntitiesDocumentNames.Slot,
     )) as Model<SlotsDocument>;
     try {
       const initUsers: User[] = [

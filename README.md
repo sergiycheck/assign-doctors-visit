@@ -30,6 +30,14 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Environment variables
+
+```env
+PORT=4023
+POPULATE=0
+MONDB_DB_CONN_STR=''
+```
+
 [Persist cron jobs stackoverflow question with answer](https://stackoverflow.com/questions/36568096/persist-my-cron-jobs-and-execute-them-even-if-my-node-server-restarted)
 
 - [agenda](https://github.com/agenda/agenda) mongoddb

@@ -1,19 +1,23 @@
+import { EntitiesDocumentNames } from './../../common/base-entities';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { BaseEntity } from '../../common/base-entities';
-import { User, UserDocumentName } from '../../../resources/user/entities/user.entity';
-import {
-  Doctor,
-  DoctorDocumentName,
-} from '../../../resources/doctor/entities/doctor.entity';
-
-export const SlotDocumentName = 'Slot';
+import { User } from '../../../resources/user/entities/user.entity';
+import { Doctor } from '../../../resources/doctor/entities/doctor.entity';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Slot extends BaseEntity {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: UserDocumentName, required: false })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: EntitiesDocumentNames.User,
+    required: false,
+  })
   user?: User;
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: DoctorDocumentName, required: true })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: EntitiesDocumentNames.Doctor,
+    required: true,
+  })
   doctor: Doctor;
   // slot field, but we will have createdAt and updatedAt fields
 

@@ -1,3 +1,5 @@
+import { CustomParseObjectIdPipe } from './../../common/pipes/custom-parse-objectid.pipe';
+import { NotEmptyPipe } from './../../common/pipes/not-empty.pipe';
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DoctorService } from './doctor.service';
@@ -20,17 +22,22 @@ export class DoctorController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.doctorService.findOne(+id);
+  findOne(
+    @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
+  ) {
+    return this.doctorService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDoctorDto: UpdateDoctorDto) {
-    return this.doctorService.update(+id, updateDoctorDto);
+  update(
+    @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
+    @Body() updateDoctorDto: UpdateDoctorDto,
+  ) {
+    return this.doctorService.update(id, updateDoctorDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.doctorService.remove(+id);
+  remove(@Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string) {
+    return this.doctorService.remove(id);
   }
 }

@@ -1,3 +1,5 @@
+import { CustomParseObjectIdPipe } from './../../common/pipes/custom-parse-objectid.pipe';
+import { NotEmptyPipe } from './../../common/pipes/not-empty.pipe';
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { SlotService } from './slot.service';
 import { CreateSlotDto } from './dto/create-slot.dto';
@@ -20,17 +22,22 @@ export class SlotController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.slotService.findOne(+id);
+  findOne(
+    @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
+  ) {
+    return this.slotService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSlotDto: UpdateSlotDto) {
-    return this.slotService.update(+id, updateSlotDto);
+  update(
+    @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
+    @Body() updateSlotDto: UpdateSlotDto,
+  ) {
+    return this.slotService.update(id, updateSlotDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.slotService.remove(+id);
+  remove(@Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string) {
+    return this.slotService.remove(id);
   }
 }
