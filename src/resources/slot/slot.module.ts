@@ -1,8 +1,16 @@
+import { UpdateDoctorDto } from './../doctor/dto/update-doctor.dto';
+import { injectedNames } from './../common/user-doctor-common.service-creator';
 import { Module } from '@nestjs/common';
 import { SlotService } from './slot.service';
 import { SlotController } from './slot.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Slot, SlotsSchema } from './entities/slot.entity';
+import { UserModule } from '../user/user.module';
+import { DoctorModule } from '../doctor/doctor.module';
+import { User, UserDocument } from '../user/entities/user.entity';
+import { Doctor, DoctorDocument } from '../doctor/entities/doctor.entity';
+import { createUserDoctorCommonServiceClass } from '../common/user-doctor-common.service-creator';
+import { UpdateUserDto } from '../user/dto/update-user.dto';
 
 @Module({
   imports: [
@@ -15,8 +23,24 @@ import { Slot, SlotsSchema } from './entities/slot.entity';
         },
       },
     ]),
+    UserModule,
+    DoctorModule,
   ],
   controllers: [SlotController],
-  providers: [SlotService],
+  providers: [
+    SlotService,
+    {
+      provide: injectedNames.UserCommonService,
+      useClass: createUserDoctorCommonServiceClass<UserDocument, UpdateUserDto>(
+        User.name,
+      ),
+    },
+    {
+      provide: injectedNames.DoctorCommonService,
+      useClass: createUserDoctorCommonServiceClass<DoctorDocument, UpdateDoctorDto>(
+        Doctor.name,
+      ),
+    },
+  ],
 })
 export class SlotModule {}

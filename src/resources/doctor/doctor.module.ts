@@ -18,5 +18,6 @@ import { Doctor, DoctorsSchema } from './entities/doctor.entity';
   ],
   controllers: [DoctorController],
   providers: [DoctorService],
+  exports: [DoctorService, MongooseModule],
 })
 export class DoctorModule {}

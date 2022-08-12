@@ -6,7 +6,7 @@ import { DbInitializer } from './utils/seed-db';
 
 export default async function populateDb(app: INestApplicationContext) {
   const configService = app.get(ConfigService);
-  if (configService.get('POPULATE') === '1') {
+  if (configService.get('POPULATE') === 1) {
     const logger = app.get(CustomLogger);
     const connection = app.get(CustomConnectionService).getConnection();
     const dbInitializer = new DbInitializer(connection, logger);

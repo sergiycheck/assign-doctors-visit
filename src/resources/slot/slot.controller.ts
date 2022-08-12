@@ -11,9 +11,9 @@ import { ApiTags } from '@nestjs/swagger';
 export class SlotController {
   constructor(private readonly slotService: SlotService) {}
 
-  @Post()
-  create(@Body() createSlotDto: CreateSlotDto) {
-    return this.slotService.create(createSlotDto);
+  @Post('create-with-related-entities-update')
+  createWithUpdate(@Body() createSlotDto: CreateSlotDto) {
+    return this.slotService.createSlotUpdateEntities(createSlotDto);
   }
 
   @Get()
@@ -39,5 +39,12 @@ export class SlotController {
   @Delete(':id')
   remove(@Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string) {
     return this.slotService.remove(id);
+  }
+
+  @Delete('remove-with-update/:id')
+  removeWithUpdate(
+    @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
+  ) {
+    return this.slotService.removeSlotUpdateEntities(id);
   }
 }

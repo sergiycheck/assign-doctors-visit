@@ -8,33 +8,45 @@ export class EntityService<
   TCreateClassEntityDto,
   TUpdateClassEntityDto extends { id: string },
   TClassEntity extends BaseEntity,
+  TClassRes,
 > {
   constructor(
     /**@InjectModel(Model.name) in inherited constructor*/
     public model: Model<TClassDocument>,
   ) {}
 
-  async create(createEntityDto: TCreateClassEntityDto) {
+  async createRaw(createEntityDto: TCreateClassEntityDto) {
     const entity = new this.model({
       ...createEntityDto,
     });
     const newEntity = await entity.save();
+
+    return newEntity;
+  }
+
+  async create(createEntityDto: TCreateClassEntityDto) {
+    const newEntity = await this.createRaw(createEntityDto);
     const obj = newEntity.toObject() as LeanDocument<TClassEntity>;
     return this.mapResponse(obj);
   }
 
-  private mapResponse(entity: LeanDocument<TClassEntity>) {
+  public mapResponse(entity: LeanDocument<TClassEntity>): TClassRes {
     const { _id, ...data } = entity;
 
-    return {
+    const mapped = {
       id: _id,
       ...data,
-    };
+    } as unknown as TClassRes;
+
+    return mapped;
   }
 
   async findAll() {
+    const count = await this.model.count({});
     const arrQuery = await this.model.find({});
-    return arrQuery.map((o) => this.mapResponse(o.toObject()));
+    const data = arrQuery.map((o) => this.mapResponse(o.toObject()));
+
+    return { count, data };
   }
 
   async findOne(id: string) {
@@ -43,9 +55,15 @@ export class EntityService<
     return entity ? this.mapResponse(entity) : null;
   }
 
-  async update(id: string, updateEntityDto: TUpdateClassEntityDto) {
+  async exists(id: string) {
     const exists = await this.model.exists({ _id: id });
     if (!exists) throw new NotFoundException(`entity with id ${id} doesn't exist `);
+
+    return true;
+  }
+
+  async update(id: string, updateEntityDto: TUpdateClassEntityDto) {
+    await this.exists(id);
 
     const { id: idDto, ...updateData } = updateEntityDto;
     const updateEntity = (await this.model
