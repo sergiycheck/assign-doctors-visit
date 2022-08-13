@@ -1,6 +1,6 @@
 import { UpdateDoctorDto } from './../doctor/dto/update-doctor.dto';
 import { injectedNames } from './../common/user-doctor-common.service-creator';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { SlotService } from './slot.service';
 import { SlotController } from './slot.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -24,7 +24,7 @@ import { UpdateUserDto } from '../user/dto/update-user.dto';
       },
     ]),
     UserModule,
-    DoctorModule,
+    forwardRef(() => DoctorModule),
   ],
   controllers: [SlotController],
   providers: [
@@ -42,5 +42,6 @@ import { UpdateUserDto } from '../user/dto/update-user.dto';
       ),
     },
   ],
+  exports: [SlotService],
 })
 export class SlotModule {}

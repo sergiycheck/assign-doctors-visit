@@ -21,11 +21,23 @@ export class DoctorController {
     return this.doctorService.findAll();
   }
 
+  @Get('with-slots')
+  findAllWithSlots() {
+    return this.doctorService.findAllWithSlots();
+  }
+
   @Get(':id')
   findOne(
     @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
   ) {
     return this.doctorService.findOne(id);
+  }
+
+  @Get('with-slots/:id')
+  findOneWithSlots(
+    @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
+  ) {
+    return this.doctorService.findOneWithSlots(id);
   }
 
   @Patch(':id')

@@ -1,4 +1,5 @@
-export class DoctorRes {
+import { CommonResponse } from './../../common/common-response';
+export class DoctorRes extends CommonResponse {
   id: string;
   name: string;
   phone: string;

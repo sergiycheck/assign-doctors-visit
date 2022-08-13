@@ -18,7 +18,7 @@ export type IUserDoctorCommonService<
     } & TUpdateClassEntDto,
   >(
     entity: TSlotContainingEntity,
-    slot: Slot,
+    slot_id: string,
   ): Promise<
     HydratedDocument<TClassDoc, Record<string, unknown>, Record<string, unknown>>
   >;
@@ -46,11 +46,11 @@ export function createUserDoctorCommonServiceClass<
 
     public async addSlot<
       TSlotContainingEntity extends { slots: Slot[] } & TUpdateClassEntDto,
-    >(entity: TSlotContainingEntity, slot: Slot) {
+    >(entity: TSlotContainingEntity, slot_id: string) {
       const updatedEntity = await this.model.findOneAndUpdate(
         { _id: entity.id },
         {
-          $push: { slots: slot._id },
+          $push: { slots: slot_id },
         },
         { new: true },
       );

@@ -2,7 +2,7 @@ import { CustomParseObjectIdPipe } from './../../common/pipes/custom-parse-objec
 import { NotEmptyPipe } from './../../common/pipes/not-empty.pipe';
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { SlotService } from './slot.service';
-import { CreateSlotDto } from './dto/create-slot.dto';
+import { AssignSlotForUserDto, CreateSlotForDoctorDto } from './dto/create-slot.dto';
 import { UpdateSlotDto } from './dto/update-slot.dto';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -11,9 +11,19 @@ import { ApiTags } from '@nestjs/swagger';
 export class SlotController {
   constructor(private readonly slotService: SlotService) {}
 
-  @Post('create-with-related-entities-update')
-  createWithUpdate(@Body() createSlotDto: CreateSlotDto) {
-    return this.slotService.createSlotUpdateEntities(createSlotDto);
+  @Post('create-free-slot-for-doctor')
+  createWithUpdate(@Body() createSlotDto: CreateSlotForDoctorDto) {
+    return this.slotService.createFreeSlotForDoctor(createSlotDto);
+  }
+
+  @Post('assign-slot-for-user')
+  assignSlotForUser(@Body() assignSlotForUserDto: AssignSlotForUserDto) {
+    return this.slotService.assignSlotForUser(assignSlotForUserDto);
+  }
+
+  @Post('discard-slot-for-user')
+  discardSlotForUser(@Body() assignSlotForUserDto: AssignSlotForUserDto) {
+    return this.slotService.discardSlotForUser(assignSlotForUserDto);
   }
 
   @Get()

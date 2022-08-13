@@ -1,9 +1,8 @@
 import { PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
-import { CreateSlotDto } from './create-slot.dto';
-import { OmitType } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { CreateSlotForDoctorDto } from './create-slot.dto';
 
-export class UpdateSlotDto extends PartialType(CreateSlotDto) {
+export class UpdateSlotDto extends PartialType(CreateSlotForDoctorDto) {
   @IsNotEmpty()
   @IsString()
   id: string;

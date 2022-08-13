@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { SlotModule } from './../slot/slot.module';
+import { forwardRef, Module } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { DoctorController } from './doctor.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -15,6 +16,7 @@ import { Doctor, DoctorsSchema } from './entities/doctor.entity';
         },
       },
     ]),
+    forwardRef(() => SlotModule),
   ],
   controllers: [DoctorController],
   providers: [DoctorService],
