@@ -2,34 +2,22 @@ import { SlotService } from './../../slot/slot.service';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { HydratedDocument, Model, UnpackedIntersection } from 'mongoose';
-import { Slot } from '../../slot/entities/slot.entity';
 
 export const UserDoctorCommonInjectedNames = {
   UserCommonService: 'UserCommonService',
   DoctorCommonService: 'DoctorCommonService',
 };
 
-export type UserDoctorCommonServiceT<
-  TClassDoc,
-  TUpdateClassEntDto extends { id: string },
-> = {
-  addSlot<
-    TSlotContainingEntity extends {
-      slots: Slot[];
-    } & TUpdateClassEntDto,
-  >(
-    entity: TSlotContainingEntity,
+export type UserDoctorCommonServiceT<TClassDoc> = {
+  addSlot(
+    entity_id: string,
     slot_id: string,
   ): Promise<
     HydratedDocument<TClassDoc, Record<string, unknown>, Record<string, unknown>>
   >;
 
-  removeSlot<
-    TSlotContainingEntity extends {
-      slots: Slot[];
-    } & TUpdateClassEntDto,
-  >(
-    entity: TSlotContainingEntity,
+  removeSlot(
+    entity_id: string,
     slot_id: string,
   ): Promise<
     HydratedDocument<TClassDoc, Record<string, unknown>, Record<string, unknown>>
@@ -53,10 +41,7 @@ export type UserDoctorCommonServiceT<
   >;
 };
 
-export function createUserDoctorCommonServiceClass<
-  TClassDoc,
-  TUpdateClassEntDto extends { id: string },
->(modelName: string): any {
+export function createUserDoctorCommonServiceClass<TClassDoc>(modelName: string): any {
   //
   @Injectable()
   class UserDoctorCommonService {
@@ -65,11 +50,9 @@ export function createUserDoctorCommonServiceClass<
       private readonly slotService: SlotService,
     ) {}
 
-    public async addSlot<
-      TSlotContainingEntity extends { slots: Slot[] } & TUpdateClassEntDto,
-    >(entity: TSlotContainingEntity, slot_id: string) {
+    public async addSlot(entity_id: string, slot_id: string) {
       const updatedEntity = await this.model.findOneAndUpdate(
-        { _id: entity.id },
+        { _id: entity_id },
         {
           $push: { slots: slot_id },
         },
@@ -79,11 +62,9 @@ export function createUserDoctorCommonServiceClass<
       return updatedEntity;
     }
 
-    public async removeSlot<
-      TSlotContainingEntity extends { slots: Slot[] } & TUpdateClassEntDto,
-    >(entity: TSlotContainingEntity, slot_id: string) {
+    public async removeSlot(entity_id: string, slot_id: string) {
       const updatedEntity = await this.model.findOneAndUpdate(
-        { _id: entity.id },
+        { _id: entity_id },
         {
           $pull: { slots: slot_id },
         },

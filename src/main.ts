@@ -6,7 +6,6 @@ import cors from 'cors';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import mongoose from 'mongoose';
-import { CustomLoggerModule } from './common/logger/custom-logger.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

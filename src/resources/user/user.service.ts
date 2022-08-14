@@ -32,10 +32,7 @@ export class UserService extends EntityService<
     public responseMapper: ResponseMapperType<UserDocument, UserRes>,
 
     @Inject(UserDoctorCommonInjectedNames.UserCommonService)
-    private userDoctorCommonService: UserDoctorCommonServiceT<
-      UserDocument,
-      UpdateUserDto
-    >,
+    private userDoctorCommonService: UserDoctorCommonServiceT<UserDocument>,
   ) {
     super(model);
   }

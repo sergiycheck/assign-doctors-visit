@@ -14,7 +14,7 @@ export class CreateSlotForDoctorDto {
   @IsString()
   @Length(1, 50)
   @Validate(IsPropObjectId)
-  doctor_id: string;
+  doctor: string;
 
   @IsNotEmpty()
   @IsDateString()
@@ -26,13 +26,13 @@ export class CreateSlotForDoctorDto {
 }
 
 export class AssignSlotForUserDto extends PickType(CreateSlotForDoctorDto, [
-  'doctor_id',
+  'doctor',
 ] as const) {
   @IsNotEmpty()
   @IsString()
   @Length(1, 50)
   @Validate(IsPropObjectId)
-  user_id: string;
+  user: string;
 
   @IsNotEmpty()
   @IsString()
@@ -42,7 +42,7 @@ export class AssignSlotForUserDto extends PickType(CreateSlotForDoctorDto, [
 }
 
 export class CreateEntityDtoForDb extends OmitType(CreateSlotForDoctorDto, [
-  'doctor_id',
+  'doctor',
 ] as const) {
   @IsString()
   doctor: string;

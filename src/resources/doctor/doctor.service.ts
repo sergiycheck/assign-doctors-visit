@@ -31,10 +31,7 @@ export class DoctorService extends EntityService<
     public doctorResponseMapper: ResponseMapperType<DoctorDocument, DoctorRes>,
 
     @Inject(UserDoctorCommonInjectedNames.DoctorCommonService)
-    private doctorUserCommonService: UserDoctorCommonServiceT<
-      DoctorDocument,
-      UpdateDoctorDto
-    >,
+    private doctorUserCommonService: UserDoctorCommonServiceT<DoctorDocument>,
   ) {
     super(model);
   }
