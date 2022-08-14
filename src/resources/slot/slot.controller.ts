@@ -28,14 +28,14 @@ export class SlotController {
 
   @Get()
   findAll() {
-    return this.slotService.findAll();
+    return this.slotService.finAllMapped();
   }
 
   @Get(':id')
   findOne(
     @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
   ) {
-    return this.slotService.findOne(id);
+    return this.slotService.findOneMapped(id);
   }
 
   @Patch(':id')
@@ -43,7 +43,7 @@ export class SlotController {
     @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
     @Body() updateSlotDto: UpdateSlotDto,
   ) {
-    return this.slotService.update(id, updateSlotDto);
+    return this.slotService.updateMapped(id, updateSlotDto);
   }
 
   @Delete(':id')

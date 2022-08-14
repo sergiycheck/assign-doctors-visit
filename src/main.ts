@@ -1,9 +1,12 @@
+import { CustomLogger } from './common/logger/custom-logger.service';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './root-module/app.module';
 import cors from 'cors';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import mongoose from 'mongoose';
+import { CustomLoggerModule } from './common/logger/custom-logger.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -30,6 +33,11 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
+  const logger = app.get(CustomLogger);
+  mongoose.set('debug', function (collectionName, methodName, ...methodArgs) {
+    logger.log({ collectionName, methodName, ...methodArgs });
+  });
 
   const configService = app.get(ConfigService);
   const port = +configService.get('PORT');

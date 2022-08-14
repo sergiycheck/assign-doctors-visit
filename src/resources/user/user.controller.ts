@@ -13,19 +13,31 @@ export class UserController {
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+    return this.userService.createMapped(createUserDto);
   }
 
   @Get()
   findAll() {
-    return this.userService.findAll();
+    return this.userService.finAllMapped();
+  }
+
+  @Get('with-slots')
+  findAllWithSlots() {
+    return this.userService.findAllWithSlotsMapped();
   }
 
   @Get(':id')
   findOne(
     @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
   ) {
-    return this.userService.findOne(id);
+    return this.userService.findOneMapped(id);
+  }
+
+  @Get('with-slots/:id')
+  findOneWithSlots(
+    @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
+  ) {
+    return this.userService.findOneWithSlotsMapped(id);
   }
 
   @Patch(':id')
@@ -33,7 +45,7 @@ export class UserController {
     @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.update(id, updateUserDto);
+    return this.userService.updateMapped(id, updateUserDto);
   }
 
   @Delete(':id')

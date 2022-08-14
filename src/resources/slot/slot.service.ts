@@ -1,15 +1,4 @@
-import { UserDocument } from './../user/entities/user.entity';
-import {
-  IUserDoctorCommonService,
-  injectedNames,
-} from './../common/user-doctor-common.service-creator';
-import {
-  Inject,
-  Injectable,
-  forwardRef,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, forwardRef, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -26,6 +15,16 @@ import { Slot, SlotsDocument } from './entities/slot.entity';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { DoctorDocument } from '../doctor/entities/doctor.entity';
 import { UpdateDoctorDto } from '../doctor/dto/update-doctor.dto';
+import { UserDocument } from './../user/entities/user.entity';
+import {
+  UserDoctorCommonServiceT,
+  UserDoctorCommonInjectedNames,
+} from '../common/user-doctor-common/user-doctor-common.service-creator';
+
+import {
+  ResponseMapperInjectedNames,
+  ResponseMapperType,
+} from './../common/responseMapper/responseMapperCreator';
 import { SlotRes } from './dto/responses.dto';
 
 type EntityIdWithServiceType = {
@@ -36,9 +35,7 @@ type EntityIdWithServiceType = {
 export class SlotService extends EntityService<
   SlotsDocument,
   CreateEntityDtoForDb,
-  UpdateSlotDto,
-  Slot,
-  SlotRes
+  UpdateSlotDto
 > {
   constructor(
     @InjectModel(Slot.name) public model: Model<SlotsDocument>,
@@ -46,12 +43,37 @@ export class SlotService extends EntityService<
 
     @Inject(forwardRef(() => DoctorService)) public doctorService: DoctorService,
 
-    @Inject(injectedNames.UserCommonService)
-    public userCommonService: IUserDoctorCommonService<UserDocument, UpdateUserDto>,
-    @Inject(injectedNames.DoctorCommonService)
-    public doctorCommonService: IUserDoctorCommonService<DoctorDocument, UpdateDoctorDto>,
+    @Inject(ResponseMapperInjectedNames.SlotResponseMapper)
+    public responseMapper: ResponseMapperType<SlotsDocument, SlotRes>,
+
+    @Inject(UserDoctorCommonInjectedNames.UserCommonService)
+    public userCommonService: UserDoctorCommonServiceT<UserDocument, UpdateUserDto>,
+    @Inject(UserDoctorCommonInjectedNames.DoctorCommonService)
+    public doctorCommonService: UserDoctorCommonServiceT<DoctorDocument, UpdateDoctorDto>,
   ) {
     super(model);
+  }
+
+  async finAllMapped() {
+    const res = await this.findAll();
+    const data = res.arrQuery.map((o) => this.responseMapper.mapResponse(o.toObject()));
+
+    return {
+      count: res.count,
+      data,
+    };
+  }
+
+  async findOneMapped(id: string) {
+    const entity = await this.findOne(id);
+
+    return entity ? this.responseMapper.mapResponse(entity) : null;
+  }
+
+  async updateMapped(id: string, updateDto: UpdateSlotDto) {
+    const updatedEntity = await this.update(id, updateDto);
+
+    return this.responseMapper.mapResponse(updatedEntity);
   }
 
   private async relatedEntitiesExist(entitiesIdWithServices: EntityIdWithServiceType[]) {
@@ -64,7 +86,7 @@ export class SlotService extends EntityService<
   }
 
   private mapEntities(entities: { toObject(): any }[]) {
-    return entities.map((entity) => this.mapResponse(entity.toObject()));
+    return entities.map((entity) => this.responseMapper.mapResponse(entity.toObject()));
   }
 
   // adding only free slot for the doctor for further assignment for user
@@ -80,9 +102,11 @@ export class SlotService extends EntityService<
       ...slotProps,
     };
 
-    const createdSlot = (await this.createRaw(createEntityDtoForDb)) as any;
+    const createdSlot = (await this.create(createEntityDtoForDb)) as any;
 
-    const doctor = (await this.doctorService.findOne(createEntityDto.doctor_id)) as any;
+    const doctor = (await this.doctorService.findOneMapped(
+      createEntityDto.doctor_id,
+    )) as any;
 
     const updatedDoctor = await this.doctorCommonService.addSlot(doctor, createdSlot);
 
@@ -130,7 +154,7 @@ export class SlotService extends EntityService<
     const updateForSlot: UpdateSlotDto = { id: slot_id, free: false };
     const updatedSlot = await this.update(slot_id, updateForSlot);
 
-    const user = (await this.userService.findOne(user_id)) as any;
+    const user = (await this.userService.findOneMapped(user_id)) as any;
 
     const updatedUser = await this.userCommonService.addSlot(user, slot_id);
 
@@ -172,7 +196,7 @@ export class SlotService extends EntityService<
     const updateForSlot: UpdateSlotDto = { id: slot_id, free: true };
     const updatedSlot = await this.update(slot_id, updateForSlot);
 
-    const user = (await this.userService.findOne(user_id)) as any;
+    const user = (await this.userService.findOneMapped(user_id)) as any;
 
     const updatedUser = await this.userCommonService.removeSlot(user, slot_id);
 
@@ -208,11 +232,15 @@ export class SlotService extends EntityService<
 
     let updatedUser;
     if (slot.user) {
-      const user = (await this.userService.findOne(slot.user)) as any;
+      const user = (await this.userService.findOneMapped(
+        slot.user._id.toString(),
+      )) as any;
       updatedUser = await this.userCommonService.removeSlot(user, slot.id);
     }
 
-    const doctor = (await this.doctorService.findOne(slot.doctor)) as any;
+    const doctor = (await this.doctorService.findOneMapped(
+      slot.doctor._id.toString(),
+    )) as any;
 
     const updatedDoctor = await this.doctorCommonService.removeSlot(doctor, slot.id);
 

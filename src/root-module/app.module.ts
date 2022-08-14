@@ -1,3 +1,5 @@
+import { ResponseMapperModule } from './../resources/common/responseMapper/response-mapper.module';
+import { UserDoctorCommonModule } from './../resources/common/user-doctor-common/user-doctor-common.module';
 import { CustomLoggerModule } from './../common/logger/custom-logger.module';
 import { CustomConnectionService } from './../common/mongoose-connection.service';
 import { APP_FILTER } from '@nestjs/core';
@@ -11,7 +13,7 @@ import { UserModule } from '../resources/user/user.module';
 import { DoctorModule } from '../resources/doctor/doctor.module';
 import { SlotModule } from '../resources/slot/slot.module';
 import { AllExceptionsFilter } from '../common/filters/all-exceptions.filter';
-import { MongooseModule } from '@nestjs/mongoose';
+import { MongooseModule, MongooseModuleFactoryOptions } from '@nestjs/mongoose';
 import { BullModule } from '@nestjs/bull';
 
 @Module({
@@ -32,7 +34,12 @@ import { BullModule } from '@nestjs/bull';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         const uri = configService.get<string>('MONDB_DB_CONN_STR');
-        return { uri };
+        const options:
+          | MongooseModuleFactoryOptions
+          | Promise<MongooseModuleFactoryOptions> = {
+          uri,
+        };
+        return options;
       },
       inject: [ConfigService],
     }),
@@ -40,6 +47,8 @@ import { BullModule } from '@nestjs/bull';
     DoctorModule,
     SlotModule,
     CustomLoggerModule,
+    UserDoctorCommonModule,
+    ResponseMapperModule,
 
     BullModule.forRootAsync({
       imports: [ConfigModule],

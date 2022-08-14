@@ -1,14 +1,15 @@
+import { SlotService } from './../../slot/slot.service';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { HydratedDocument, Model, Types } from 'mongoose';
-import { Slot } from '../slot/entities/slot.entity';
+import { HydratedDocument, Model, UnpackedIntersection } from 'mongoose';
+import { Slot } from '../../slot/entities/slot.entity';
 
-export const injectedNames = {
+export const UserDoctorCommonInjectedNames = {
   UserCommonService: 'UserCommonService',
   DoctorCommonService: 'DoctorCommonService',
 };
 
-export type IUserDoctorCommonService<
+export type UserDoctorCommonServiceT<
   TClassDoc,
   TUpdateClassEntDto extends { id: string },
 > = {
@@ -33,6 +34,23 @@ export type IUserDoctorCommonService<
   ): Promise<
     HydratedDocument<TClassDoc, Record<string, unknown>, Record<string, unknown>>
   >;
+
+  findAllWithSlots(): Promise<{
+    count: number;
+    arrQuery: Omit<
+      HydratedDocument<TClassDoc, Record<string, unknown>, Record<string, unknown>>,
+      never
+    >[];
+  }>;
+
+  findOneWithSlots(
+    id: string,
+  ): Promise<
+    UnpackedIntersection<
+      HydratedDocument<TClassDoc, Record<string, unknown>, Record<string, unknown>>,
+      Record<string, unknown>
+    >
+  >;
 };
 
 export function createUserDoctorCommonServiceClass<
@@ -42,7 +60,10 @@ export function createUserDoctorCommonServiceClass<
   //
   @Injectable()
   class UserDoctorCommonService {
-    constructor(@InjectModel(modelName) public model: Model<TClassDoc>) {}
+    constructor(
+      @InjectModel(modelName) public model: Model<TClassDoc>,
+      private readonly slotService: SlotService,
+    ) {}
 
     public async addSlot<
       TSlotContainingEntity extends { slots: Slot[] } & TUpdateClassEntDto,
@@ -71,46 +92,19 @@ export function createUserDoctorCommonServiceClass<
 
       return updatedEntity;
     }
+
+    public async findAllWithSlots() {
+      const count = await this.model.count({});
+      const arrQuery = await this.model.find().populate({ path: 'slots' });
+
+      return { count, arrQuery };
+    }
+
+    public async findOneWithSlots(id: string) {
+      const entity = await this.model.findById(id).populate({ path: 'slots' });
+      return entity;
+    }
   }
 
   return UserDoctorCommonService;
 }
-
-// @Injectable()
-// export class UserDoctorCommonService<
-//   TClassDocument,
-//   TUpdateClassEntityDto extends { id: string },
-// > {
-//   constructor(
-//     /**@InjectModel(Model.name) in inherited constructor*/
-//     public model: Model<TClassDocument>,
-//   ) {}
-
-//   async addSlot<TSlotContainingEntity extends { slots: Slot[] } & TUpdateClassEntityDto>(
-//     entity: TSlotContainingEntity,
-//     slot: Slot,
-//   ) {
-//     const updatedEntity = await this.model.findOneAndUpdate(
-//       { _id: entity.id },
-//       {
-//         $push: { slots: slot._id },
-//       },
-//       { new: true },
-//     );
-
-//     return updatedEntity;
-//   }
-//   async removeSlot<
-//     TSlotContainingEntity extends { slots: Slot[] } & TUpdateClassEntityDto,
-//   >(entity: TSlotContainingEntity, slot: Slot) {
-//     const updatedEntity = await this.model.findOneAndUpdate(
-//       { _id: entity.id },
-//       {
-//         $pull: { slots: slot._id },
-//       },
-//       { new: true },
-//     );
-
-//     return updatedEntity;
-//   }
-// }

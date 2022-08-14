@@ -1,3 +1,5 @@
+import { ResponseMapperModule } from './../common/responseMapper/response-mapper.module';
+import { UserDoctorCommonModule } from './../common/user-doctor-common/user-doctor-common.module';
 import { SlotModule } from './../slot/slot.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
@@ -17,6 +19,8 @@ import { Doctor, DoctorsSchema } from './entities/doctor.entity';
       },
     ]),
     forwardRef(() => SlotModule),
+    forwardRef(() => UserDoctorCommonModule),
+    ResponseMapperModule,
   ],
   controllers: [DoctorController],
   providers: [DoctorService],

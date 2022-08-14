@@ -1,6 +1,6 @@
 import { EntitiesDocumentNames } from './../../common/base-entities';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import { BaseEntity } from '../../common/base-entities';
 import { User } from '../../../resources/user/entities/user.entity';
 import { Doctor } from '../../../resources/doctor/entities/doctor.entity';

@@ -13,31 +13,31 @@ export class DoctorController {
 
   @Post()
   create(@Body() createDoctorDto: CreateDoctorDto) {
-    return this.doctorService.create(createDoctorDto);
+    return this.doctorService.createMapped(createDoctorDto);
   }
 
   @Get()
   findAll() {
-    return this.doctorService.findAll();
+    return this.doctorService.finAllMapped();
   }
 
   @Get('with-slots')
   findAllWithSlots() {
-    return this.doctorService.findAllWithSlots();
+    return this.doctorService.findAllWithSlotsMapped();
   }
 
   @Get(':id')
   findOne(
     @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
   ) {
-    return this.doctorService.findOne(id);
+    return this.doctorService.findOneMapped(id);
   }
 
   @Get('with-slots/:id')
   findOneWithSlots(
     @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
   ) {
-    return this.doctorService.findOneWithSlots(id);
+    return this.doctorService.findOneWithSlotsMapped(id);
   }
 
   @Patch(':id')
@@ -45,7 +45,7 @@ export class DoctorController {
     @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
     @Body() updateDoctorDto: UpdateDoctorDto,
   ) {
-    return this.doctorService.update(id, updateDoctorDto);
+    return this.doctorService.updateMapped(id, updateDoctorDto);
   }
 
   @Delete(':id')

@@ -1,63 +1,89 @@
+import {
+  UserDoctorCommonInjectedNames,
+  UserDoctorCommonServiceT,
+} from './../common/user-doctor-common/user-doctor-common.service-creator';
 import { Doctor, DoctorDocument } from './entities/doctor.entity';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EntityService } from '../common/base.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, LeanDocument, Document, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { DoctorRes } from './dto/responses.dto';
-import { Slot } from '../slot/entities/slot.entity';
 import { SlotService } from '../slot/slot.service';
+import {
+  ResponseMapperInjectedNames,
+  ResponseMapperType,
+  EntityDocWithSlotsField,
+} from './../common/responseMapper/responseMapperCreator';
 
 @Injectable()
 export class DoctorService extends EntityService<
   DoctorDocument,
   CreateDoctorDto,
-  UpdateDoctorDto,
-  Doctor,
-  DoctorRes
+  UpdateDoctorDto
 > {
   constructor(
     @InjectModel(Doctor.name) public model: Model<DoctorDocument>,
     @Inject(forwardRef(() => SlotService)) public slotService: SlotService,
+
+    @Inject(ResponseMapperInjectedNames.DoctorResponseMapper)
+    public doctorResponseMapper: ResponseMapperType<DoctorDocument, DoctorRes>,
+
+    @Inject(UserDoctorCommonInjectedNames.DoctorCommonService)
+    private doctorUserCommonService: UserDoctorCommonServiceT<
+      DoctorDocument,
+      UpdateDoctorDto
+    >,
   ) {
     super(model);
   }
 
-  async findAllWithSlots() {
-    const count = await this.model.count({});
+  async createMapped(createDto: CreateDoctorDto) {
+    const res = await this.create(createDto);
+    const mappedRes = this.doctorResponseMapper.mapResponse(res.toObject());
+    return mappedRes;
+  }
 
-    const arrQuery = await this.model.find().populate({ path: 'slots' });
-    const data = arrQuery.map((doctorDocumentPopulated) => {
-      return this.mapDoctorWithSlot(doctorDocumentPopulated);
+  async finAllMapped() {
+    const res = await this.findAll();
+    const data = res.arrQuery.map((o) =>
+      this.doctorResponseMapper.mapResponse(o.toObject()),
+    );
+
+    return {
+      count: res.count,
+      data,
+    };
+  }
+
+  async findOneMapped(id: string) {
+    const entity = await this.findOne(id);
+
+    return entity ? this.doctorResponseMapper.mapResponse(entity) : null;
+  }
+
+  async updateMapped(id: string, updateDto: UpdateDoctorDto) {
+    const updatedEntity = await this.update(id, updateDto);
+
+    return this.doctorResponseMapper.mapResponse(updatedEntity);
+  }
+
+  public async findAllWithSlotsMapped() {
+    const { count, arrQuery } = await this.doctorUserCommonService.findAllWithSlots();
+
+    const data = arrQuery.map((entityDocumentPopulated) => {
+      return this.doctorResponseMapper.mapEntityWithSlot(entityDocumentPopulated);
     });
 
     return { count, data };
   }
 
-  async findOneWithSlots(id: string) {
-    const entity = await this.model.findById(id).populate({ path: 'slots' });
-    return this.mapDoctorWithSlot(entity);
-  }
+  public async findOneWithSlotsMapped(id: string) {
+    const entity = (await this.doctorUserCommonService.findOneWithSlots(
+      id,
+    )) as unknown as EntityDocWithSlotsField<DoctorDocument>;
 
-  private mapDoctorWithSlot(
-    entity: Doctor &
-      Document<any, any, any> & {
-        _id: Types.ObjectId;
-      },
-  ) {
-    const slotsMapped = entity.slots.map((slot) => {
-      const slotDoc = slot as Slot & { toObject(): LeanDocument<Slot> };
-      return this.slotService.mapResponse(slotDoc.toObject());
-    });
-
-    delete entity.slots;
-
-    const mappedDoctor = this.mapResponse(entity.toObject());
-
-    return {
-      ...mappedDoctor,
-      slots: slotsMapped,
-    };
+    return this.doctorResponseMapper.mapEntityWithSlot(entity);
   }
 }
