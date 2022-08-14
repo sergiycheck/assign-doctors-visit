@@ -1,6 +1,16 @@
+import { MessagingBullRedisInterceptor } from './../../common/interceptors/messages-bull-redis.interceptor';
 import { CustomParseObjectIdPipe } from './../../common/pipes/custom-parse-objectid.pipe';
 import { NotEmptyPipe } from './../../common/pipes/not-empty.pipe';
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+} from '@nestjs/common';
 import { SlotService } from './slot.service';
 import { AssignSlotForUserDto, CreateSlotForDoctorDto } from './dto/create-slot.dto';
 import { UpdateSlotDto } from './dto/update-slot.dto';
@@ -17,13 +27,29 @@ export class SlotController {
   }
 
   @Post('assign-slot-for-user')
-  assignSlotForUser(@Body() assignSlotForUserDto: AssignSlotForUserDto) {
-    return this.slotService.assignSlotForUser(assignSlotForUserDto);
+  @UseInterceptors(MessagingBullRedisInterceptor)
+  async assignSlotForUser(@Body() assignSlotForUserDto: AssignSlotForUserDto) {
+    const res = await this.slotService.assignSlotForUser(assignSlotForUserDto);
+    return {
+      message: `user ${
+        res.updatedUser.name
+      } has assigned for the doctor's visit at ${new Date(res.updatedSlot.slot_date)}`,
+      data: res,
+    };
   }
 
   @Post('discard-slot-for-user')
-  discardSlotForUser(@Body() assignSlotForUserDto: AssignSlotForUserDto) {
-    return this.slotService.discardSlotForUser(assignSlotForUserDto);
+  @UseInterceptors(MessagingBullRedisInterceptor)
+  async discardSlotForUser(@Body() assignSlotForUserDto: AssignSlotForUserDto) {
+    const res = await this.slotService.discardSlotForUser(assignSlotForUserDto);
+    return {
+      message: `user ${
+        res.updatedUser.name
+      } has discarded assignment for the doctor's visit at ${new Date(
+        res.updatedSlot.slot_date,
+      )}`,
+      data: res,
+    };
   }
 
   @Get()

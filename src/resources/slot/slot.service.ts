@@ -12,9 +12,7 @@ import {
 } from './dto/create-slot.dto';
 import { UpdateSlotDto } from './dto/update-slot.dto';
 import { Slot, SlotsDocument } from './entities/slot.entity';
-import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { DoctorDocument } from '../doctor/entities/doctor.entity';
-import { UpdateDoctorDto } from '../doctor/dto/update-doctor.dto';
 import { UserDocument } from './../user/entities/user.entity';
 import {
   UserDoctorCommonServiceT,
@@ -163,9 +161,12 @@ export class SlotService extends EntityService<
     }
 
     const updateForSlot: UpdateSlotDto = { id: slot_id, free: false, user: user_id };
-    const updatedSlot = await this.update(slot_id, updateForSlot);
+    const updatedSlot = await this.updateMapped(slot_id, updateForSlot);
 
-    const updatedUser = await this.userCommonService.addSlot(user_id, slot_id);
+    const updatedUserFromDb = await this.userCommonService.addSlot(user_id, slot_id);
+    const updatedUser = this.userService.responseMapper.mapResponse(
+      updatedUserFromDb.toObject(),
+    );
 
     return { updatedSlot, updatedUser };
   }
@@ -219,11 +220,14 @@ export class SlotService extends EntityService<
     const updateForSlot: UpdateSlotDto = {
       id: slot_id,
       free: true,
-      $unset: { user: '' },
+      user: '',
     };
     const updatedSlot = await this.updateMapped(slot_id, updateForSlot);
 
-    const updatedUser = await this.userCommonService.removeSlot(user_id, slot_id);
+    const updatedUserFromDb = await this.userCommonService.removeSlot(user_id, slot_id);
+    const updatedUser = this.userService.responseMapper.mapResponse(
+      updatedUserFromDb.toObject(),
+    );
 
     return { updatedSlot, updatedUser };
   }
