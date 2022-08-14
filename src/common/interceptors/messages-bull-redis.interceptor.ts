@@ -1,3 +1,4 @@
+import { MessagingQueueAssigningSlotsService } from './../../resources/slot/messagin-queue.service';
 import { UserRes } from './../../resources/user/dto/responses.dto';
 import { SlotRes } from './../../resources/slot/dto/responses.dto';
 import {
@@ -9,7 +10,7 @@ import {
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-export interface Response {
+export interface AssignmentResponse {
   message: string;
   data: {
     updatedSlot: SlotRes;
@@ -18,11 +19,17 @@ export interface Response {
 }
 
 @Injectable()
-export class MessagingBullRedisInterceptor implements NestInterceptor<Response> {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<Response> {
+export class MessagingBullRedisInterceptor
+  implements NestInterceptor<AssignmentResponse>
+{
+  constructor(private messagingService: MessagingQueueAssigningSlotsService) {}
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<AssignmentResponse> {
     return next.handle().pipe(
-      tap((data: Response) => {
-        console.log(data);
+      tap((data: AssignmentResponse) => {
+        this.messagingService.addNotificationsOnAssignment(data);
       }),
     );
   }

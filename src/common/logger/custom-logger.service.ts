@@ -1,5 +1,7 @@
 import { ConsoleLogger, Injectable, Scope } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import fs from 'node:fs';
+import path from 'node:path';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class CustomLogger extends ConsoleLogger {
@@ -17,5 +19,23 @@ export class CustomLogger extends ConsoleLogger {
     if (envType === 'dev') {
       super.log(message, context, ...rest);
     }
+  }
+
+  logToFile(message: string, filePathWithDir = './logs/notifications.log') {
+    const fileName = path.resolve(process.cwd(), filePathWithDir);
+
+    const writeStream = fs.createWriteStream(fileName);
+
+    writeStream.write(message, 'utf8');
+
+    writeStream.end();
+
+    writeStream.on('finish', () => {
+      this.log(`Write completed to file ${fileName}`);
+    });
+
+    writeStream.on('error', (err) => {
+      this.error(err);
+    });
   }
 }
