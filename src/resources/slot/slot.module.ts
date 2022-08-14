@@ -30,8 +30,8 @@ import {
     forwardRef(() => DoctorModule),
     forwardRef(() => UserDoctorCommonModule),
     ResponseMapperModule,
-
     CustomLoggerModule,
+
     BullModule.registerQueue({
       name: SlotsQueuesNames.assign_doctors_visit_queue,
     }),

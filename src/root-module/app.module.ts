@@ -29,7 +29,6 @@ import { BullModule } from '@nestjs/bull';
         QUEUE_PORT: Joi.number().required(),
       }),
     }),
-    // ScheduleModule.forRoot(),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
@@ -43,12 +42,6 @@ import { BullModule } from '@nestjs/bull';
       },
       inject: [ConfigService],
     }),
-    UserModule,
-    DoctorModule,
-    SlotModule,
-    CustomLoggerModule,
-    UserDoctorCommonModule,
-    ResponseMapperModule,
 
     BullModule.forRootAsync({
       imports: [ConfigModule],
@@ -60,6 +53,13 @@ import { BullModule } from '@nestjs/bull';
       }),
       inject: [ConfigService],
     }),
+
+    UserModule,
+    DoctorModule,
+    SlotModule,
+    CustomLoggerModule,
+    UserDoctorCommonModule,
+    ResponseMapperModule,
   ],
   controllers: [AppController],
   providers: [

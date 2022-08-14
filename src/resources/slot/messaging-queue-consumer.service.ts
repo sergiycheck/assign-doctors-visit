@@ -13,13 +13,15 @@ export class MessagingQueueConsumer {
 
   @Process(QueueJobNames.notification_on_assignment_day_before)
   async handlingJobNotificationOnAssignDayBefore(job: Job<ReminderJobType>) {
-    this.customLogger.logToFile(`Handling notification day before. ${job.data.message}`);
+    this.customLogger.logToFile(
+      `Handling notification day before. ${job.data.message.data}`,
+    );
   }
 
   @Process(QueueJobNames.notification_on_assignment_2_hours_before)
   async handlingJobNotificationOnAssignTwoHoursBefore(job: Job<ReminderJobType>) {
-    this.customLogger.customLog(
-      `Handling notification 2 hours before ${job.data.message}`,
+    this.customLogger.logToFile(
+      `Handling notification 2 hours before ${job.data.message.data}`,
     );
   }
 }

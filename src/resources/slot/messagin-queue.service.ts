@@ -1,7 +1,7 @@
 import { AssignmentResponse } from './../../common/interceptors/messages-bull-redis.interceptor';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
-import { Job, Queue } from 'bull';
+import { Queue } from 'bull';
 
 export const SlotsQueuesNames = {
   assign_doctors_visit_queue: 'assign_doctors_visit_queue',
@@ -45,33 +45,36 @@ export class MessagingQueueAssigningSlotsService {
     slotAssignmentNotificationDayBeforeDate = new Date(Date.now() - 1000 * 10);
     slotAssignmentNotificationTwoHoursBeforeDate = new Date(Date.now() - 1000 * 2);
 
-    /** const jobDayBefore = */ await this.assignDoctorsVisitQueue.add(
+    const assignDoctorsVisitQueueDelayDayBefore = 2000;
+    const assignDoctorsVisitQueueDelay2HoursBefore = 5000;
+
+    await this.assignDoctorsVisitQueue.add(
       QueueJobNames.notification_on_assignment_day_before,
       {
         message: {
           data:
-            `${slotAssignmentNotificationDayBeforeDate} | Hello ${data.updatedUser.name}!` +
-            `Reminder that you was assigned for ${data.updatedSlot.doctor}` +
-            `tomorrow at ${new Date(data.updatedSlot.slot_date)}`,
+            `${slotAssignmentNotificationDayBeforeDate} | \n` +
+            `Hello ${data.updatedUser.name}! Reminder that you was assigned for ${data.updatedSlot.doctor} \n` +
+            `tomorrow at ${new Date(data.updatedSlot.slot_date)} \n`,
         },
       },
       {
-        delay: slotAssignmentNotificationDayBeforeDate.getTime(),
+        delay: assignDoctorsVisitQueueDelayDayBefore,
       },
     );
 
-    /** const jobTwoHoursBefore = */ await this.assignDoctorsVisitQueue.add(
+    await this.assignDoctorsVisitQueue.add(
       QueueJobNames.notification_on_assignment_2_hours_before,
       {
         message: {
           data:
-            `${slotAssignmentNotificationDayBeforeDate} | Hello ${data.updatedUser.name}!` +
-            `Reminder. You have to visit ${data.updatedSlot.doctor} in 2 hours` +
-            `at ${new Date(data.updatedSlot.slot_date)}`,
+            `${slotAssignmentNotificationTwoHoursBeforeDate} | Hello ${data.updatedUser.name}! \n` +
+            `Reminder. You have to visit ${data.updatedSlot.doctor} in 2 hours \n` +
+            `at ${new Date(data.updatedSlot.slot_date)} \n`,
         },
       },
       {
-        delay: slotAssignmentNotificationTwoHoursBeforeDate.getTime(),
+        delay: assignDoctorsVisitQueueDelay2HoursBefore,
       },
     );
   }

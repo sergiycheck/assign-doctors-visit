@@ -21,10 +21,10 @@ export class CustomLogger extends ConsoleLogger {
     }
   }
 
-  logToFile(message: string, filePathWithDir = './logs/notifications.log') {
+  logToFile(message: string, filePathWithDir = './notifications.log') {
     const fileName = path.resolve(process.cwd(), filePathWithDir);
 
-    const writeStream = fs.createWriteStream(fileName);
+    const writeStream = fs.createWriteStream(fileName, { flags: 'a' });
 
     writeStream.write(message, 'utf8');
 
