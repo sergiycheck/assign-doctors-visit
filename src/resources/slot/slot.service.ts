@@ -1,3 +1,4 @@
+import { UserRes } from './../user/dto/responses.dto';
 import { Inject, Injectable, forwardRef, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Document, Model } from 'mongoose';
@@ -23,7 +24,7 @@ import {
   ResponseMapperInjectedNames,
   ResponseMapperType,
 } from './../common/responseMapper/responseMapperCreator';
-import { SlotRes } from './dto/responses.dto';
+import { SlotRes, SlotResWithRelations } from './dto/responses.dto';
 
 type EntityIdWithServiceType = {
   id: string;
@@ -52,6 +53,54 @@ export class SlotService extends EntityService<
     super(model);
   }
 
+  private mapSlotWithRelations(
+    slotDoc: Omit<
+      Slot &
+        mongoose.Document<any, any, any> & {
+          _id: mongoose.Types.ObjectId;
+        },
+      never
+    >,
+  ) {
+    let slotMapped: SlotResWithRelations;
+
+    if (slotDoc.user) {
+      const userDoc = slotDoc.user as UserDocument;
+      const user = this.userService.responseMapper.mapResponse(userDoc.toObject());
+      delete slotDoc.user;
+
+      slotMapped = {
+        ...slotMapped,
+        user,
+      };
+    }
+
+    if (slotDoc.doctor) {
+      const doctorDoc = slotDoc.doctor as DoctorDocument;
+      const doctor = this.doctorService.doctorResponseMapper.mapResponse(
+        doctorDoc.toObject(),
+      );
+      delete slotDoc.doctor;
+
+      slotMapped = {
+        ...slotMapped,
+        doctor,
+      };
+    }
+
+    const slot = this.responseMapper.mapResponse(slotDoc.toObject()) as unknown as Omit<
+      Slot,
+      'user' | 'doctor'
+    >;
+
+    slotMapped = {
+      ...slot,
+      ...slotMapped,
+    };
+
+    return slotMapped;
+  }
+
   async finAllMapped() {
     const res = await this.findAll();
     const data = res.arrQuery.map((o) => this.responseMapper.mapResponse(o.toObject()));
@@ -62,10 +111,24 @@ export class SlotService extends EntityService<
     };
   }
 
+  async findAllWithRelatedEntitiesMapped() {
+    const count = await this.model.count();
+    const slotDocs = await this.model.find({}).populate(['doctor', 'user']);
+
+    const result = slotDocs.map((slotDoc) => this.mapSlotWithRelations(slotDoc));
+    return { count, result };
+  }
+
   async findOneMapped(id: string) {
     const entity = await this.findOne(id);
 
     return entity ? this.responseMapper.mapResponse(entity) : null;
+  }
+
+  async findOneWithRelatedEntitiesMapped(id: string) {
+    const slotDoc = await this.model.findById(id).populate(['doctor', 'user']);
+
+    return this.mapSlotWithRelations(slotDoc);
   }
 
   async updateMapped(id: string, updateDto: UpdateSlotDto) {
@@ -80,6 +143,34 @@ export class SlotService extends EntityService<
     const updatedEntity = await this.update(id, updateDto);
 
     return this.responseMapper.mapResponse(updatedEntity);
+  }
+
+  async addJobsIdUpdate(id: string, jobIds: string[]) {
+    await this.exists(id);
+
+    const updatedEntity = await this.model.findOneAndUpdate(
+      { _id: id },
+      {
+        $push: { jobIds: { $each: jobIds } },
+      },
+      { new: true },
+    );
+
+    return updatedEntity;
+  }
+
+  async removeJobsIdUpdate(id: string, jobIds: string[]) {
+    await this.exists(id);
+
+    const updatedEntity = await this.model.findOneAndUpdate(
+      { _id: id },
+      {
+        $pullAll: { jobIds: jobIds },
+      },
+      { new: true },
+    );
+
+    return updatedEntity;
   }
 
   private async relatedEntitiesExist(entitiesIdWithServices: EntityIdWithServiceType[]) {
@@ -235,6 +326,7 @@ export class SlotService extends EntityService<
   //TODO: ? change assigned slot time
   // async updateSlotForUser() {}
 
+  // remove slot and update users and doctors slot properties
   async removeSlotUpdateEntities(id: string) {
     await this.exists(id);
     const slot = await this.findOneMapped(id);

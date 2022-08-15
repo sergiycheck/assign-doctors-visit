@@ -19,7 +19,7 @@ export interface AssignmentResponse {
 }
 
 @Injectable()
-export class MessagingBullRedisInterceptor
+export class AddNotificationsBullRedisInterceptor
   implements NestInterceptor<AssignmentResponse>
 {
   constructor(private messagingService: MessagingQueueAssigningSlotsService) {}
@@ -30,6 +30,23 @@ export class MessagingBullRedisInterceptor
     return next.handle().pipe(
       tap((data: AssignmentResponse) => {
         this.messagingService.addNotificationsOnAssignment(data);
+      }),
+    );
+  }
+}
+
+@Injectable()
+export class RemoveNotificationsBullRedisInterceptor
+  implements NestInterceptor<AssignmentResponse>
+{
+  constructor(private messagingService: MessagingQueueAssigningSlotsService) {}
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<AssignmentResponse> {
+    return next.handle().pipe(
+      tap((data: AssignmentResponse) => {
+        this.messagingService.removeNotificationsForAssignment(data);
       }),
     );
   }

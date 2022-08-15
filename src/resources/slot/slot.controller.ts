@@ -1,4 +1,3 @@
-import { MessagingBullRedisInterceptor } from './../../common/interceptors/messages-bull-redis.interceptor';
 import { CustomParseObjectIdPipe } from './../../common/pipes/custom-parse-objectid.pipe';
 import { NotEmptyPipe } from './../../common/pipes/not-empty.pipe';
 import {
@@ -16,6 +15,11 @@ import { AssignSlotForUserDto, CreateSlotForDoctorDto } from './dto/create-slot.
 import { UpdateSlotDto } from './dto/update-slot.dto';
 import { ApiTags } from '@nestjs/swagger';
 
+import {
+  AddNotificationsBullRedisInterceptor,
+  RemoveNotificationsBullRedisInterceptor,
+} from './../../common/interceptors/messages-bull-redis.interceptor';
+
 @ApiTags('SlotController')
 @Controller('slot')
 export class SlotController {
@@ -27,7 +31,7 @@ export class SlotController {
   }
 
   @Post('assign-slot-for-user')
-  @UseInterceptors(MessagingBullRedisInterceptor)
+  @UseInterceptors(AddNotificationsBullRedisInterceptor)
   async assignSlotForUser(@Body() assignSlotForUserDto: AssignSlotForUserDto) {
     const res = await this.slotService.assignSlotForUser(assignSlotForUserDto);
     return {
@@ -39,7 +43,7 @@ export class SlotController {
   }
 
   @Post('discard-slot-for-user')
-  @UseInterceptors(MessagingBullRedisInterceptor)
+  @UseInterceptors(RemoveNotificationsBullRedisInterceptor)
   async discardSlotForUser(@Body() assignSlotForUserDto: AssignSlotForUserDto) {
     const res = await this.slotService.discardSlotForUser(assignSlotForUserDto);
     return {
@@ -57,11 +61,23 @@ export class SlotController {
     return this.slotService.finAllMapped();
   }
 
+  @Get('with-user-and-doctor')
+  findAllWithRelations() {
+    return this.slotService.findAllWithRelatedEntitiesMapped();
+  }
+
   @Get(':id')
   findOne(
     @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
   ) {
     return this.slotService.findOneMapped(id);
+  }
+
+  @Get('with-user-and-doctor/:id')
+  findOneWithRelations(
+    @Param('id', new NotEmptyPipe('id'), new CustomParseObjectIdPipe()) id: string,
+  ) {
+    return this.slotService.findOneWithRelatedEntitiesMapped(id);
   }
 
   @Patch(':id')
