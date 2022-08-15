@@ -21,6 +21,8 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 README.md
-helpful-links.txt
 
-
+.env
+mongo_datadir
+redis_storage
+todo

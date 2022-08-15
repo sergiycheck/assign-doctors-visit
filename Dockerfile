@@ -10,9 +10,9 @@ COPY . .
 
 EXPOSE $PORT
 
-RUN apt-get update && \ 
-  apt-get -y dist-upgrade
+# upgrage distribution to use different command line tools
+# RUN apt-get update && \ 
+#   apt-get -y dist-upgrade
 
 VOLUME [ "/home/node/app" ]
 
-CMD yanr run build
