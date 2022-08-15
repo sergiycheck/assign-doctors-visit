@@ -4,4 +4,4 @@ env
 
 set -e
 
-exec yarn run start:prod
+exec yarn run start

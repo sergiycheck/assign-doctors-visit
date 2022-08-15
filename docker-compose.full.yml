@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  assign-doctors-visit-api:
+  web-api:
     build:
       context: .
     ports:

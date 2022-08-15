@@ -6,7 +6,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "prefill": "export NODE_ENV=dev&&nest start --path tsconfig.prefill.json -c nest-cli-prefill.json --debug --watch",
+    "start-populate": "nest start --path tsconfig.prefill.json -c nest-cli-prefill.json",
+    "prefill": "export NODE_ENV=dev&&export POPULATE=1&&nest start --path tsconfig.prefill.json -c nest-cli-prefill.json",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
