@@ -1,50 +1,46 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { LeanDocument, Model } from 'mongoose';
-import { BaseEntity } from './base-entities';
 
 @Injectable()
 export class EntityService<
   TClassDocument,
   TCreateClassEntityDto,
   TUpdateClassEntityDto extends { id: string },
-  TClassEntity extends BaseEntity,
 > {
   constructor(
     /**@InjectModel(Model.name) in inherited constructor*/
     public model: Model<TClassDocument>,
   ) {}
 
-  async create(createEntityDto: TCreateClassEntityDto) {
+  protected async create(createEntityDto: TCreateClassEntityDto) {
     const entity = new this.model({
       ...createEntityDto,
     });
     const newEntity = await entity.save();
-    const obj = newEntity.toObject() as LeanDocument<TClassEntity>;
-    return this.mapResponse(obj);
+
+    return newEntity;
   }
 
-  private mapResponse(entity: LeanDocument<TClassEntity>) {
-    const { _id, ...data } = entity;
-
-    return {
-      id: _id,
-      ...data,
-    };
-  }
-
-  async findAll() {
+  protected async findAll() {
+    const count = await this.model.count({});
     const arrQuery = await this.model.find({});
-    return arrQuery.map((o) => this.mapResponse(o.toObject()));
+    return { count, arrQuery };
   }
 
-  async findOne(id: string) {
-    const entity = (await this.model.findById(id).lean()) as LeanDocument<TClassEntity>;
-    return this.mapResponse(entity);
+  protected async findOne(id: string) {
+    const entity = (await this.model.findById(id).lean()) as LeanDocument<TClassDocument>;
+    return entity;
   }
 
-  async update(id: string, updateEntityDto: TUpdateClassEntityDto) {
+  public async exists(id: string) {
     const exists = await this.model.exists({ _id: id });
     if (!exists) throw new NotFoundException(`entity with id ${id} doesn't exist `);
+
+    return true;
+  }
+
+  protected async update(id: string, updateEntityDto: TUpdateClassEntityDto) {
+    await this.exists(id);
 
     const { id: idDto, ...updateData } = updateEntityDto;
     const updateEntity = (await this.model
@@ -53,12 +49,12 @@ export class EntityService<
         { ...updateData },
         { runValidators: true, new: true },
       )
-      .lean()) as unknown as LeanDocument<TClassEntity>;
+      .lean()) as unknown as LeanDocument<TClassDocument>;
 
-    return this.mapResponse(updateEntity);
+    return updateEntity;
   }
 
-  remove(id: string) {
+  public remove(id: string) {
     return this.model.deleteOne({ _id: id });
   }
 }
