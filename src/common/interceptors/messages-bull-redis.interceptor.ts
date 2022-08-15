@@ -1,3 +1,4 @@
+import { DoctorRes } from './../../resources/doctor/dto/responses.dto';
 import { MessagingQueueAssigningSlotsService } from './../../resources/slot/messagin-queue.service';
 import { UserRes } from './../../resources/user/dto/responses.dto';
 import { SlotRes } from './../../resources/slot/dto/responses.dto';
@@ -15,6 +16,7 @@ export interface AssignmentResponse {
   data: {
     updatedSlot: SlotRes;
     updatedUser: UserRes;
+    doctor: Omit<DoctorRes, 'slots'>;
   };
 }
 

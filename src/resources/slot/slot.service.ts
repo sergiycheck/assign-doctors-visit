@@ -1,7 +1,7 @@
 import { UserRes } from './../user/dto/responses.dto';
 import { Inject, Injectable, forwardRef, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Document, Model } from 'mongoose';
+import mongoose, { Document, LeanDocument, Model } from 'mongoose';
 
 import { EntityService } from '../common/base.service';
 import { DoctorService } from '../doctor/doctor.service';
@@ -25,6 +25,7 @@ import {
   ResponseMapperType,
 } from './../common/responseMapper/responseMapperCreator';
 import { SlotRes, SlotResWithRelations } from './dto/responses.dto';
+import { DoctorRes } from '../doctor/dto/responses.dto';
 
 type EntityIdWithServiceType = {
   id: string;
@@ -242,7 +243,7 @@ export class SlotService extends EntityService<
           },
         },
       ],
-    )) as DoctorDocument[];
+    )) as LeanDocument<DoctorDocument>[];
 
     if (!doctorWithSlotsContainingTargetSlot.length) {
       throw new BadRequestException({
@@ -250,6 +251,11 @@ export class SlotService extends EntityService<
         data: assignSlotForUserDto,
       });
     }
+    const [targetDoctor] = doctorWithSlotsContainingTargetSlot;
+    const targetDoctorMapped =
+      this.doctorService.doctorResponseMapper.mapResponse(targetDoctor);
+    delete targetDoctorMapped.slots;
+    const doctor = targetDoctorMapped as Omit<DoctorRes, 'slots'>;
 
     const updateForSlot: UpdateSlotDto = { id: slot_id, free: false, user: user_id };
     const updatedSlot = await this.updateMapped(slot_id, updateForSlot);
@@ -259,7 +265,7 @@ export class SlotService extends EntityService<
       updatedUserFromDb.toObject(),
     );
 
-    return { updatedSlot, updatedUser };
+    return { updatedSlot, updatedUser, doctor };
   }
 
   // make slot free and remove slot_id for user's slots arr
@@ -299,7 +305,7 @@ export class SlotService extends EntityService<
           },
         },
       ],
-    )) as DoctorDocument[];
+    )) as LeanDocument<DoctorDocument>[];
 
     if (!doctorWithSlotsContainingTargetSlot.length) {
       throw new BadRequestException({
@@ -307,6 +313,12 @@ export class SlotService extends EntityService<
         data: assignSlotForUserDto,
       });
     }
+
+    const [targetDoctor] = doctorWithSlotsContainingTargetSlot;
+    const targetDoctorMapped =
+      this.doctorService.doctorResponseMapper.mapResponse(targetDoctor);
+    delete targetDoctorMapped.slots;
+    const doctor = targetDoctorMapped as Omit<DoctorRes, 'slots'>;
 
     const updateForSlot: UpdateSlotDto = {
       id: slot_id,
@@ -320,7 +332,7 @@ export class SlotService extends EntityService<
       updatedUserFromDb.toObject(),
     );
 
-    return { updatedSlot, updatedUser };
+    return { updatedSlot, updatedUser, doctor };
   }
 
   //TODO: ? change assigned slot time

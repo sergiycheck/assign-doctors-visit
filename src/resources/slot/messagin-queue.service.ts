@@ -38,7 +38,7 @@ export class MessagingQueueAssigningSlotsService {
 
   async addNotificationsOnAssignment(assignmentResponse: AssignmentResponse) {
     const { data } = assignmentResponse;
-    const { updatedSlot } = data;
+    const { updatedSlot, updatedUser, doctor } = data;
     const slotAssignmentDate = new Date(updatedSlot.slot_date);
 
     const slotAssignmentNotification_1_DayBeforeDate = new Date(
@@ -66,10 +66,10 @@ export class MessagingQueueAssigningSlotsService {
       {
         message: {
           data:
-            `|\n` +
+            `\n` +
             `${slotAssignmentNotification_1_DayBeforeDate} | \n` +
-            `Hello ${data.updatedUser.name}! Reminder that you was assigned for ${data.updatedSlot.doctor} \n` +
-            `tomorrow at ${new Date(data.updatedSlot.slot_date)} \n`,
+            `Hello ${updatedUser.name}! Reminder that you was assigned for ${doctor.spec} \n` +
+            `tomorrow at ${new Date(updatedSlot.slot_date)} \n`,
         },
       },
       {
@@ -84,10 +84,10 @@ export class MessagingQueueAssigningSlotsService {
       {
         message: {
           data:
-            `|\n` +
-            `${slotAssignmentNotification_2_HoursBeforeDate} | Hello ${data.updatedUser.name}! \n` +
-            `Reminder. You have to visit ${data.updatedSlot.doctor} in 2 hours \n` +
-            `at ${new Date(data.updatedSlot.slot_date)} \n`,
+            `\n` +
+            `${slotAssignmentNotification_2_HoursBeforeDate} | Hello ${updatedUser.name}! \n` +
+            `Reminder. You have to visit ${doctor.spec} in 2 hours \n` +
+            `at ${new Date(updatedSlot.slot_date)} \n`,
         },
       },
       {
@@ -104,7 +104,7 @@ export class MessagingQueueAssigningSlotsService {
 
   async removeNotificationsForAssignment(assignmentResponse: AssignmentResponse) {
     const { data } = assignmentResponse;
-    const { updatedSlot } = data;
+    const { updatedSlot, updatedUser, doctor } = data;
 
     await this.slotService.removeJobsIdUpdate(updatedSlot.id, updatedSlot.jobIds);
 
@@ -118,10 +118,10 @@ export class MessagingQueueAssigningSlotsService {
     await this.assignDoctorsVisitQueue.add(QueueJobNames.discard_assignment, {
       message: {
         data:
-          `|\n` +
+          `\n` +
           `${new Date(Date.now())} | \n` +
-          `Hello ${data.updatedUser.name}! You have successfully discarded assignment \n` +
-          `for ${data.updatedSlot.doctor} \n` +
+          `Hello ${updatedUser.name}! You have successfully discarded assignment \n` +
+          `for ${doctor.spec} \n` +
           `at ${new Date(updatedSlot.slot_date)} \n`,
       },
     });
