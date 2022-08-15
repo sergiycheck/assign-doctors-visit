@@ -1,4 +1,4 @@
-import { IsPropObjectId } from './../../../common/pipes/custom-parse-objectid.pipe';
+import { IsPropObjectId } from './../../common/dtos-validations-constraints';
 import { OmitType, PickType } from '@nestjs/swagger';
 import {
   IsBoolean,
@@ -45,5 +45,7 @@ export class CreateEntityDtoForDb extends OmitType(CreateSlotForDoctorDto, [
   'doctor',
 ] as const) {
   @IsString()
+  @Length(1, 50)
+  @Validate(IsPropObjectId)
   doctor: string;
 }
