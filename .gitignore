@@ -36,3 +36,5 @@ lerna-debug.log*
 .env
 mongo_datadir
 redis_storage
+start-app-docker.dev.sh
+
