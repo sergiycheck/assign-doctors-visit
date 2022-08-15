@@ -49,19 +49,14 @@ export class MessagingQueueAssigningSlotsService {
       slotAssignmentDate.getTime() - this.millisecondsInHour * 2,
     );
 
-    // TODO: debug it and remove it
-
-    let assignDoctorsVisitQueueDelayDayBefore =
+    const assignDoctorsVisitQueueDelayDayBefore =
       slotAssignmentNotification_1_DayBeforeDate.getTime() - Date.now();
 
-    let assignDoctorsVisitQueueDelay2HoursBefore =
+    const assignDoctorsVisitQueueDelay2HoursBefore =
       slotAssignmentNotification_2_HoursBeforeDate.getTime() - Date.now();
 
-    assignDoctorsVisitQueueDelayDayBefore = 2000;
-    assignDoctorsVisitQueueDelay2HoursBefore = 5000;
-
     const oneDayBeforeJobId = `${randomUUID()}-1-day-before-${updatedSlot.id}`;
-    /* const jobOneDayBefore = */ await this.assignDoctorsVisitQueue.add(
+    await this.assignDoctorsVisitQueue.add(
       QueueJobNames.notification_on_assignment_day_before,
       {
         message: {
@@ -75,11 +70,12 @@ export class MessagingQueueAssigningSlotsService {
       {
         delay: assignDoctorsVisitQueueDelayDayBefore,
         jobId: oneDayBeforeJobId,
+        removeOnComplete: true,
       },
     );
 
     const twoHorsBeforeJobId = `${randomUUID()}-2-hours-before-${updatedSlot.id}`;
-    /* const jobTwoHoursBefore = */ await this.assignDoctorsVisitQueue.add(
+    await this.assignDoctorsVisitQueue.add(
       QueueJobNames.notification_on_assignment_2_hours_before,
       {
         message: {
@@ -93,6 +89,7 @@ export class MessagingQueueAssigningSlotsService {
       {
         delay: assignDoctorsVisitQueueDelay2HoursBefore,
         jobId: twoHorsBeforeJobId,
+        removeOnComplete: true,
       },
     );
 
@@ -111,19 +108,23 @@ export class MessagingQueueAssigningSlotsService {
     for (const jobId of updatedSlot.jobIds) {
       if (jobId) {
         const job = await this.assignDoctorsVisitQueue.getJob(jobId);
-        await job.remove();
+        if (job) await job.remove();
       }
     }
 
-    await this.assignDoctorsVisitQueue.add(QueueJobNames.discard_assignment, {
-      message: {
-        data:
-          `\n` +
-          `${new Date(Date.now())} | \n` +
-          `Hello ${updatedUser.name}! You have successfully discarded assignment \n` +
-          `for ${doctor.spec} \n` +
-          `at ${new Date(updatedSlot.slot_date)} \n`,
+    await this.assignDoctorsVisitQueue.add(
+      QueueJobNames.discard_assignment,
+      {
+        message: {
+          data:
+            `\n` +
+            `${new Date(Date.now())} | \n` +
+            `Hello ${updatedUser.name}! You have successfully discarded assignment \n` +
+            `for ${doctor.spec} \n` +
+            `at ${new Date(updatedSlot.slot_date)} \n`,
+        },
       },
-    });
+      { removeOnComplete: true },
+    );
   }
 }

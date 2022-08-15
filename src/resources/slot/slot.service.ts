@@ -209,8 +209,6 @@ export class SlotService extends EntityService<
   async assignSlotForUser(assignSlotForUserDto: AssignSlotForUserDto) {
     const { doctor: doctor_id, user: user_id, slot_id } = assignSlotForUserDto;
 
-    //TODO: check if user has other assigned slots for that time
-
     await this.relatedEntitiesExist([
       { id: doctor_id, service: this.doctorService },
       { id: user_id, service: this.userService },
@@ -334,9 +332,6 @@ export class SlotService extends EntityService<
 
     return { updatedSlot, updatedUser, doctor };
   }
-
-  //TODO: ? change assigned slot time
-  // async updateSlotForUser() {}
 
   // remove slot and update users and doctors slot properties
   async removeSlotUpdateEntities(id: string) {

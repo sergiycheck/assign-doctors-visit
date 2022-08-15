@@ -1,1 +1,13 @@
- [x] display doctors's name instead of doctor's id in the notification
+[x] display doctors's name instead of doctor's id in the notification
+
+TODO: [] check if user has other assigned slots for that time
+
+TODO: [] change assigned slot time
+async updateSlotForUser() {}
+
+testing delay times for notifications
+
+```ts
+let assignDoctorsVisitQueueDelayDayBefore = 1000 * 24;
+let assignDoctorsVisitQueueDelay2HoursBefore = 1000 * 34;
+```
