@@ -40,6 +40,18 @@ QUEUE_HOST='localhost'
 QUEUE_PORT=6380
 ```
 
+### Change ownership in case of errors with docker compose up
+
+```bash
+sudo chown -R dev mongo_datadir
+```
+
+where **dev** is the name of the current user
+
+```bash
+sudo chown -R dev redis_storage
+```
+
 [Persist cron jobs stackoverflow question with answer](https://stackoverflow.com/questions/36568096/persist-my-cron-jobs-and-execute-them-even-if-my-node-server-restarted)
 
 - [agenda](https://github.com/agenda/agenda) mongoddb

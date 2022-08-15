@@ -1,6 +1,24 @@
 version: '3.9'
 
 services:
+  assign-doctors-visit-api:
+    build:
+      context: .
+    ports:
+      - 4025:4023
+    volumes:
+      - ./:/home/node/app
+    restart: always
+    environment:
+      - PORT=4023
+      - POPULATE=0
+      - QUEUE_HOST=redis_storage
+      - QUEUE_PORT=6379
+      - MONDB_DB_CONN_STR=mongodb://serhii:serhii_pass@mongo_db:27017/assign-doctors-visit-db?authMechanism=DEFAULT&authSource=admin
+
+    depends_on:
+      - mongo_db
+    command: sh -c './entr.dev.sh'
 
   redis_storage:
     image: redis
