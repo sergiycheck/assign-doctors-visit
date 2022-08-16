@@ -26,6 +26,9 @@ export class Slot extends BaseEntity {
 
   @Prop({ required: true, type: mongoose.Schema.Types.Boolean })
   free: boolean;
+
+  @Prop({ type: [mongoose.Schema.Types.String] })
+  jobIds?: string[];
 }
 
 export type SlotsDocument = Slot & Document;

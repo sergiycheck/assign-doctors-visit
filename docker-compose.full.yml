@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  web-api:
+    build:
+      context: .
+    ports:
+      - 4025:4023
+    volumes:
+      - ./:/home/node/app
+    restart: always
+    environment:
+      - PORT=4023
+      - POPULATE=0
+      - QUEUE_HOST=redis_storage
+      - QUEUE_PORT=6379
+      - MONDB_DB_CONN_STR=mongodb://serhii:serhii_pass@mongo_db:27017/assign-doctors-visit-db?authMechanism=DEFAULT&authSource=admin
+
+    depends_on:
+      - mongo_db
+    command: sh -c './entr.dev.sh'
+
+  redis_storage:
+    image: redis
+    restart: always
+    command: redis-server --save 5 1 --loglevel warning
+    ports:
+      - 6380:6379
+    volumes:
+      - $PWD/redis_storage:/data
+
+  mongo_db:
+    image: mongo
+    restart: always
+    ports:
+      - 27018:27017
+    volumes:
+      - $PWD/mongo_datadir:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: serhii
+      MONGO_INITDB_ROOT_PASSWORD: serhii_pass
+      MONGO_INITDB_DATABASE: assign-doctors-visit-db
